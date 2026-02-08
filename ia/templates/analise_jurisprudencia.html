@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'body' %}
+<main class="min-h-screen bg-slate-100/40">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-900">Análise Jurisprudencial</h1>
+                    <p class="mt-2 text-sm text-gray-500">Documento: <span class="font-medium text-gray-900">{% if documento %}{{ documento.get_tipo_display }} - {{ documento.data_upload|date:"d/m/Y" }}{% else %}Petição Inicial - Ação de Cobrança{% endif %}</span></p>
+                </div>
+                <div class="flex gap-3">
+                    {% if not analise %}
+                    <form method="POST" action="{% url 'processar_analise' documento.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            Analisar Documento
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'clientes' %}" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 hover:bg-gray-50">
+                        Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 rounded-xl p-4 {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-slate-50 text-slate-800 border border-slate-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Índice de Risco Geral -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-xs ring-1 ring-gray-900/5 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">Índice de Risco Geral</h2>
+                        <p class="mt-1 text-sm text-gray-500">Avaliação geral do documento</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-gray-900">{% if analise %}{{ analise.indice_risco }}{% else %}0{% endif %}</div>
+                            <div class="text-sm text-gray-500">/ 100</div>
+                        </div>
+                        <span class="px-4 py-2 rounded-full text-sm font-medium {% if analise %}{% if analise.classificacao == 'Baixo' %}bg-green-100 text-green-800{% elif analise.classificacao == 'Médio' %}bg-yellow-100 text-yellow-800{% elif analise.classificacao == 'Alto' %}bg-orange-100 text-orange-800{% else %}bg-red-100 text-red-800{% endif %}{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {% if analise %}{{ analise.classificacao }}{% else %}Médio{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Coluna Esquerda -->
+            <div class="space-y-6">
+                <!-- Erros de Coerência -->
+                <div class="bg-white rounded-xl shadow-xs ring-1 ring-gray-900/5 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-gray-900">Erros de Coerência & Lacunas Argumentativas</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            {% if analise %}{{ analise.erros_coerencia|length }} pontos{% else %}0 pontos{% endif %}
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        {% if analise and analise.erros_coerencia %}
+                            {% for erro in analise.erros_coerencia %}
+                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ erro }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <p class="text-sm text-gray-400 italic">Nenhum erro de coerência identificado ainda. Clique em "Analisar Documento" para iniciar a análise.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-800">
+                            <span class="font-semibold">Sugestão:</span> 
+                            <span class="text-blue-700">Alinhe a narrativa dos fatos com os pedidos e confira datas/valores citados.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Problemas de Formatação -->
+                <div class="bg-white rounded-xl shadow-xs ring-1 ring-gray-900/5 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-gray-900">Problemas de Formatação e Estrutura</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {% if analise %}{{ analise.problemas_formatacao|length }} ajustes{% else %}0 ajustes{% endif %}
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        {% if analise and analise.problemas_formatacao %}
+                            {% for problema in analise.problemas_formatacao %}
+                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ problema }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <p class="text-sm text-gray-400 italic">Nenhum problema de formatação identificado ainda. Clique em "Analisar Documento" para iniciar a análise.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-800">
+                            <span class="font-semibold">Sugestão:</span> 
+                            <span class="text-blue-700">Aplique o padrão do escritório para sumário, títulos e rodapés.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita -->
+            <div class="space-y-6">
+                <!-- Riscos Jurídicos -->
+                <div class="bg-white rounded-xl shadow-xs ring-1 ring-gray-900/5 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-gray-900">Riscos Jurídicos Identificados</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            {% if analise %}{{ analise.riscos_juridicos|length }} riscos{% else %}0 riscos{% endif %}
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        {% if analise and analise.riscos_juridicos %}
+                            {% for risco in analise.riscos_juridicos %}
+                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ risco }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <p class="text-sm text-gray-400 italic">Nenhum risco jurídico identificado ainda. Clique em "Analisar Documento" para iniciar a análise.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-800">
+                            <span class="font-semibold">Sugestão:</span> 
+                            <span class="text-blue-700">Reforce prova pré-constituída e detalhe o dano suportado.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Red Flags Críticas -->
+                <div class="bg-white rounded-xl shadow-xs ring-1 ring-red-200 p-6 border-2 border-red-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-red-900">Red Flags Críticas</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-200 text-red-900 font-semibold">
+                            Atenção máxima
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        {% if analise and analise.red_flags %}
+                            {% for red_flag in analise.red_flags %}
+                                <div class="border-2 border-red-200 rounded-lg p-4 bg-red-50/50">
+                                    <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ red_flag }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="border-2 border-red-200 rounded-lg p-4 bg-red-50/50">
+                                <p class="text-sm text-gray-400 italic">Nenhuma red flag crítica identificada ainda. Clique em "Analisar Documento" para iniciar a análise.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 p-3 bg-red-100 rounded-lg border border-red-200">
+                        <p class="text-xs text-red-900">
+                            <span class="font-semibold">Recomendação:</span> 
+                            <span class="text-red-800">Recomenda-se revisar esses pontos antes de protocolar a peça para evitar indeferimento ou nulidades futuras.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações do Documento -->
+        <div class="mt-6 bg-white rounded-xl shadow-xs ring-1 ring-gray-900/5 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-900">Informações do Documento</h3>
+                    <p class="mt-1 text-xs text-gray-500">
+                        {% if analise %}
+                            Documento processado em <span class="font-medium">{{ analise.tempo_processamento }} segundos</span>. 
+                            Análise realizada em {{ analise.data_criacao|date:"d/m/Y H:i" }}. v. modelo jurisprudencial atualizado.
+                        {% else %}
+                            Documento ainda não foi analisado. Clique em "Analisar Documento" para iniciar.
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    {% if analise %}
+                    <form method="POST" action="{% url 'processar_analise' documento.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            Reanalisar Documento
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 hover:bg-gray-50" {% if not analise %}disabled{% endif %}>
+                        Baixar relatório em PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-600 text-center">
+                Esta análise é automática e não substitui a revisão humana do(a) advogado(a).
+            </p>
+        </div>
+    </div>
+</main>
+{% endblock 'body' %}

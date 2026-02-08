@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block 'body' %}
+    <div class="relative isolate px-6 py-12 ">
+        <svg aria-hidden="true"
+             class="absolute inset-0 -z-10 size-full mask-[radial-gradient(100%_100%_at_top_right,white,transparent)] stroke-gray-200">
+            <defs>
+            <pattern id="1d4240dd-898f-445f-932d-e2872fd12de3" width="200" height="200" x="50%" y="0" patternUnits="userSpaceOnUse">
+            <path d="M.5 200V.5H200" fill="none" />
+            </pattern>
+            </defs>
+            <svg x="50%" y="0" class="overflow-visible fill-gray-50">
+                <path d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z" stroke-width="0" />
+            </svg>
+            <rect width="100%" height="100%" fill="url(#1d4240dd-898f-445f-932d-e2872fd12de3)" stroke-width="0" />
+        </svg>
+        <div aria-hidden="true"
+             class="absolute inset-x-0 top-10 -z-10 flex transform-gpu justify-center overflow-hidden blur-3xl">
+            <div style="clip-path: polygon(73.6% 51.7%, 91.7% 11.8%, 100% 46.4%, 97.4% 82.2%, 92.5% 84.9%, 75.7% 64%, 55.3% 47.5%, 46.5% 49.4%, 45% 62.9%, 50.3% 87.2%, 21.3% 64.1%, 0.1% 100%, 5.4% 51.1%, 21.4% 63.9%, 58.9% 0.2%, 73.6% 51.7%)"
+                 class="aspect-1108/632 w-277 flex-none bg-linear-to-r from-[#80caff] to-[#4f46e5] opacity-20"></div>
+        </div>
+        
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Contextos Utilizados pelo RAG</h1>
+                <p class="text-gray-600">Pergunta: <span class="font-medium text-gray-900">{{ pergunta.pergunta }}</span></p>
+                <p class="text-sm text-gray-500 mt-2">Total de contextos: {{ contextos.count }}</p>
+            </div>
+            
+            {% if contextos %}
+                <div class="grid mt-8 gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                    {% for contexto in contextos %}
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-semibold">
+                                        {{ forloop.counter }}
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">{{ contexto.tool_name }}</h3>
+                                        <p class="text-xs text-gray-500">Ferramenta utilizada</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Conteúdo:</h4>
+                                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 max-h-96 overflow-y-auto">
+                                    {% if contexto.content %}
+                                        <details open>
+                                            <summary class="text-xs text-blue-600 cursor-pointer hover:text-blue-800 font-medium mb-2">Conteúdo completo</summary>
+                                            <div class="mt-2 p-2 bg-white rounded border border-gray-300">
+                                                <pre class="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono overflow-x-auto">{{ contexto.content }}</pre>
+                                            </div>
+                                        </details>
+                                    {% else %}
+                                        <p class="text-sm text-gray-500 italic">Sem conteúdo disponível</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if contexto.tool_args %}
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Argumentos:</h4>
+                                <div class="bg-blue-50 border border-blue-200 rounded-md p-3 max-h-48 overflow-y-auto">
+                                    <pre class="text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap break-words">{{ contexto.tool_args }}</pre>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Footer -->
+                            <div class="pt-4 border-t border-gray-200">
+                                <p class="text-xs text-gray-500">
+                                    ID: {{ contexto.id }} | 
+                                    Pergunta ID: {{ contexto.pergunta.id }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mt-12 text-center py-12 bg-white border border-gray-200 rounded-lg">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">Nenhum contexto encontrado</h3>
+                    <p class="mt-2 text-sm text-gray-500">Não foram encontrados contextos do RAG para esta pergunta.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock 'body' %}
