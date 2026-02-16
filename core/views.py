@@ -4,4 +4,4 @@ def landing_page(request):
     """
     View para a landing page do ai.Judge
     """
-    return render(request, 'core/landing.html')
+    return render(request, 'core/index.html')

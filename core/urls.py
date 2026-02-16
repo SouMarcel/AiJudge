@@ -21,13 +21,13 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('usuarios/', include('usuarios.urls')), # Rota para as funcionalidades de usuários
+    path('usuarios/', include('usuarios.urls')), # Rota para as funcionalidades de usuï¿½rios
     path('ia/', include('ia.urls')), # Rota para as funcionalidades de IA
     path('martor/', include('martor.urls')), # Rota para o editor de markdown
-    path('', include('core.urls')), # Rota para a landing page
+    path('', include('pages.urls')), # Rota para a landing page
 ]
 
-# Servir arquivos estáticos e media em desenvolvimento
+# Servir arquivos estï¿½ticos e media em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

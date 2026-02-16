@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'martor',
     'ia',
     'django_q',
+    'pages',
     'core',
 ]
 
