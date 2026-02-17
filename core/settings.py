@@ -120,13 +120,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 # ==================================================
 
-import os
+STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'templates/static'),)
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Procura por uma lista de diretórios estáticos
+STATICFILES_DIRS = [
+    BASE_DIR / 'templates' / 'static',
+    BASE_DIR / 'pages' / 'static',
+    BASE_DIR / 'usuarios' / 'static',
+    BASE_DIR / 'ia' / 'static',
+]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 from django.contrib.messages import constants
