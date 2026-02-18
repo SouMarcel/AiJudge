@@ -8,11 +8,15 @@ class Cliente(models.Model):
         ('PJ', 'Pessoa juridica'),
     ]
 
+    id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=255)
     email = models.EmailField()
+    telefone = models.CharField(max_length=11)
     tipo = models.CharField(max_length=2, choices=TIPO_CHOICES, default='PF')
     status = models.BooleanField(default=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    cpf_cnpj = models.CharField(max_length=18, unique=True)
 
     def __str__(self):
         return self.nome
