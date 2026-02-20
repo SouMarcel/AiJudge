@@ -8,7 +8,6 @@ class Cliente(models.Model):
         ('PJ', 'Pessoa juridica'),
     ]
 
-    id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=255)
     email = models.EmailField()
     telefone = models.CharField(max_length=11)
@@ -17,9 +16,10 @@ class Cliente(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
     cpf_cnpj = models.CharField(max_length=18, unique=True)
+    is_vip = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.nome
+        return f"{self.nome} ({self.cpf_cnpj}) ({self.telefone})"
     
 class Documentos(models.Model):
     TIPO_CHOICES = [

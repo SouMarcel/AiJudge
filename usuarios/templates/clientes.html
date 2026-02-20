@@ -14,12 +14,12 @@
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-semibold tracking-tight">Clientes</h1>
-                <p class="text-slate-500 mt-1">Visão geral da sua base de clientes</p>
+                <p class="text-slate-500 mt-1">VisÃ£o geral da sua base de clientes</p>
             </div>
             <div class="flex gap-3">
                 <a href="#"
                    class="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition-colors">
-                    Configurações da Empresa
+                    ConfiguraÃ§Ãµes da Empresa
                 </a>
                 <button onclick="abrirModal()"
                         class="bg-black text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
@@ -38,26 +38,24 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="bg-white rounded-2xl p-6 shadow-sm">
                 <p class="text-xs text-slate-400">TOTAL</p>
-                <h2 class="text-3xl font-semibold mt-2">124</h2>
+                <h2 class="text-3xl font-semibold mt-2">{{ clientes|length }}</h2>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <p class="text-xs text-slate-
-                    </tbody>
-                </table>400">ATIVOS</p>
-                <h2 class="text-3xl font-semibold mt-2">87</h2>
+                <p class="text-xs text-slate-400">ATIVOS</p>
+                <h2 class="text-3xl font-semibold mt-2">{{ clientes_ativos }}</h2>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-sm">
                 <p class="text-xs text-slate-400">VIP</p>
-                <h2 class="text-3xl font-semibold mt-2">12</h2>
+                <h2 class="text-3xl font-semibold mt-2">{{ clientes_vip }}</h2>
             </div>
             <div class="bg-white rounded-2xl p-6 shadow-sm">
                 <p class="text-xs text-slate-400">INATIVOS</p>
-                <h2 class="text-3xl font-semibold mt-2">25</h2>
+                <h2 class="text-3xl font-semibold mt-2">{{ clientes_inativos }}</h2>
             </div>
         </div>
         <div class="bg-white rounded-3xl shadow-sm">
             <div class="flex flex-col md:flex-row gap-4 justify-between p-6 border-b border-slate-200">
-                <input class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm w-full md:w-80 focus:ring-4 focus:ring-slate-100 outline-none"
+                <input id="searchInput" class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm w-full md:w-80 focus:ring-4 focus:ring-slate-100 outline-none"
                        placeholder="Buscar cliente..." />
                 <div class="flex gap-3">
                     <select class="border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm">
@@ -70,20 +68,30 @@
                 <table class="w-full text-sm border-separate border-spacing-y-3">
                     <thead class="text-slate-400">
                         <tr>
-                            <th class="text-left">Cliente</th>
-                            <th>Contato</th>
-                            <th>Tipo</th>
-                            <th>Status</th>
+                            <th class="text-center">Cliente</th>
+                            <th class="text-center">CPF/CNPJ</th>
+                            <th class="text-center">Telefone</th>
+                            <th class="text-center">Email</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="clientesTableBody">
                         {% for cliente in clientes %}      
-                            <tr class="bg-[#f9fafc] rounded-xl">
-                                <td class="p-4 font-medium"><a href="{% url 'cliente' cliente.id %}">{{ cliente.nome }}</a></td>
+                            <tr class="bg-[#f9fafc] rounded-xl cliente-row" data-nome="{{ cliente.nome|lower }}" data-cpf="{{ cliente.cpf_cnpj|lower }}">
+                                <td class="p-4 font-medium">
+                                {% if cliente.is_vip %}
+                                        <span class="bg-yellow-100 text-yellow-70 px-3 py-1 rounded-full text-xs"><a href="{% url 'cliente' cliente.id %}">{{ cliente.nome }}</a></span>
+                                    {% else %}
+                                        <a href="{% url 'cliente' cliente.id %}">{{ cliente.nome }}</a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ cliente.cpf_cnpj }}</td>
+                                <td class="text-center">{{ cliente.telefone }}</td>
                                 <td class="text-center">{{ cliente.email }}</td>
                                 <td class="text-center">{{ cliente.get_tipo_display }}</td>
                                 <td class="text-center">
-                                    <span class="{% if cliente.get_status_display %} bg-emerald-100 text-emerald-70 {% else %} bg-red-100 text-red-70 {% endif %}0 px-3 py-1 rounded-full text-xs">{% if cliente.get_status_display %} Ativo {% else %} Inativo {% endif %}</span>
+                                    <span class="{% if cliente.get_status_display %} bg-red-100 text-red-70 {% else %} bg-emerald-100 text-emerald-70 {% endif %}0 px-3 py-1 rounded-full text-xs">{% if cliente.get_status_display %} Inativo {% else %} Ativo {% endif %}</span>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -118,11 +126,27 @@
                                required
                                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 outline-none">
                     </div>
-                    <div>
+                                        <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input type="email"
                                name="email"
                                id="email"
+                               required
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 outline-none">
+                    </div>
+                    <div>
+                        <label for="telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text"
+                               name="telefone"
+                               id="telefone"
+                               required
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 outline-none">
+                    </div>
+                    <div>
+                        <label for="cpf_cnpj" class="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ</label>
+                        <input type="text"
+                               name="cpf_cnpj"
+                               id="cpf_cnpj"
                                required
                                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 outline-none">
                     </div>
@@ -132,8 +156,8 @@
                                 id="tipo"
                                 required
                                 class="w-full border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-slate-900/20 focus:border-slate-300 outline-none">
-                            <option value="PF">Pessoa Física</option>
-                            <option value="PJ">Pessoa Jurídica</option>
+                            <option value="PF">Pessoa FÃ­sica</option>
+                            <option value="PJ">Pessoa JurÃ­dica</option>
                         </select>
                     </div>
                     <div class="flex items-center">
@@ -143,6 +167,14 @@
                                checked
                                class="h-4 w-4 text-slate-900 focus:ring-slate-900 border-slate-300 rounded">
                         <label for="status" class="ml-2 block text-sm text-gray-700">Cliente ativo</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox"
+                                name="is_vip"
+                                id="is_vip"
+                                checked
+                                class="h-4 w-4 text-slate-900 focus:ring-slate-900 border-slate-300 rounded">
+                        <label for="is_vip" class="ml-2 block text-sm text-gray-700">Cliente VIP</label>
                     </div>
                     <div class="flex gap-3 pt-4">
                         <button type="button"
@@ -172,6 +204,36 @@
             if (event.key === 'Escape') {
                 fecharModal();
             }
+        });
+        
+        // Busca de clientes
+        const searchInput = document.getElementById('searchInput');
+        const clientesTableBody = document.getElementById('clientesTableBody');
+        const clienteRows = document.querySelectorAll('.cliente-row');
+        
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            // Só inicia a busca após 3 caracteres
+            if (searchTerm.length < 3) {
+                // Se tiver menos de 3 caracteres, mostra todos
+                clienteRows.forEach(row => {
+                    row.style.display = '';
+                });
+                return;
+            }
+            
+            // Filtra as linhas
+            clienteRows.forEach(row => {
+                const nome = row.dataset.nome || '';
+                const cpf = row.dataset.cpf || '';
+                
+                if (nome.includes(searchTerm) || cpf.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
     </script>
 {% endblock 'body' %}

@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 from django.contrib import auth
 from .models import Cliente, Documentos
 from ia.agents import JuriAi
+from django.contrib.auth.decorators import login_required
+
 
 def cadastro(request):
     if request.method == 'GET':
@@ -54,22 +56,37 @@ def login(request):
             return redirect('login')
         
 
+@login_required
 def clientes(request):
     if request.method == 'GET':
         clientes = Cliente.objects.filter(user=request.user)
-        return render(request, 'clientes.html', {'clientes': clientes})
+        clientes_ativos = clientes.filter(status=True).count()
+        clientes_inativos = clientes.filter(status=False).count()
+        clientes_vip = clientes.filter(is_vip=True).count()
+        return render(request, 'clientes.html', {
+            'clientes': clientes,
+            'clientes_ativos': clientes_ativos,
+            'clientes_inativos': clientes_inativos,
+            'clientes_vip': clientes_vip
+        })
     elif request.method == 'POST':
         nome = request.POST.get('nome')
         email = request.POST.get('email')
         tipo = request.POST.get('tipo')
         status = request.POST.get('status') == 'on'
+        telefone = request.POST.get('telefone')
+        cpf_cnpj = request.POST.get('cpf_cnpj')
+        is_vip = request.POST.get('is_vip') == 'on'
 
         Cliente.objects.create(
             nome=nome,
             email=email,
             tipo=tipo,
             status=status,
-            user=request.user
+            user=request.user,
+            telefone=telefone,
+            cpf_cnpj=cpf_cnpj,
+            is_vip=is_vip
         )
 
         messages.add_message(request, constants.SUCCESS, 'Cliente cadastrado com sucesso!')
