@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %}http://127.0.0.1:8000/usuarios/cliente/1
 {% block 'head' %}
     <style>
     #modal-novo-cliente {
@@ -22,7 +22,7 @@
                     ConfiguraÃ§Ãµes da Empresa
                 </a>
                 <button onclick="abrirModal()"
-                        class="bg-black text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
+                        class="bg-black text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer">
                     Novo cliente
                 </button>
             </div>
@@ -172,7 +172,7 @@
                         <input type="checkbox"
                                 name="is_vip"
                                 id="is_vip"
-                                checked
+                                unchecked
                                 class="h-4 w-4 text-slate-900 focus:ring-slate-900 border-slate-300 rounded">
                         <label for="is_vip" class="ml-2 block text-sm text-gray-700">Cliente VIP</label>
                     </div>
